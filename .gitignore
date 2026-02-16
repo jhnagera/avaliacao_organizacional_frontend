@@ -1,0 +1,54 @@
+# -----------------------------------------------------------------------------
+# .gitignore para Frontend Node.js (React/Vue/Angular/Vite)
+# -----------------------------------------------------------------------------
+
+# Dependências (O MAIS IMPORTANTE)
+node_modules/
+jspm_packages/
+
+# Arquivos de log
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds e Build Artifacts
+dist/
+build/
+output/
+release/
+.parcel-cache/
+.vite/
+
+# Variáveis de Ambiente e Chaves Secretas (SEGURANÇA)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# Editor/IDE e SO
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Cobertura de testes
+coverage/
+
+# Cache de ferramentas
+.eslintcache
+.stylelintcache
+.npm/
+.pnpm/
+
+# Typescript
+*.tsbuildinfo
