@@ -11,6 +11,7 @@ import Departamentos from './pages/Departamentos';
 import Avisos from './pages/Avisos';
 import Reclamacoes from './pages/Reclamacoes';
 import Denuncias from './pages/Denuncias';
+import Empresas from './pages/Empresas';
 
 const theme = createTheme({
   palette: {
@@ -35,6 +36,7 @@ const AppRoutes: React.FC = () => {
             <Layout>
               <Routes>
                 <Route path="/dashboard"     element={<Dashboard />} />
+                <Route path="/empresas"      element={<Empresas />} />
                 <Route path="/questionarios" element={<Questionarios />} />
                 <Route path="/usuarios"      element={<Usuarios />} />
                 <Route path="/departamentos" element={<Departamentos />} />

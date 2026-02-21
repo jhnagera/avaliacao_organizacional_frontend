@@ -17,6 +17,7 @@ import {
   AccountCircle,
   Logout,
   Business,
+  BusinessCenter,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -29,7 +30,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { usuario, logout, isRH } = useAuth();
+  const { usuario, logout, isRH, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,14 +40,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const menuItems = [
-    { text: 'Dashboard',              icon: <DashboardIcon />, path: '/dashboard',    visible: true  },
-    { text: 'Questionários',          icon: <Assignment />,    path: '/questionarios', visible: true  },
-    { text: 'Usuários',               icon: <People />,        path: '/usuarios',      visible: isRH  },
-    { text: 'Departamentos',          icon: <Business />,      path: '/departamentos', visible: isRH  },
-    { text: 'Avisos',                 icon: <Announcement />,  path: '/avisos',        visible: true  },
-    { text: 'Reclamações/Sugestões',  icon: <Feedback />,      path: '/reclamacoes',   visible: isRH  },
-    { text: 'Denúncias',              icon: <Report />,        path: '/denuncias',     visible: isRH  },
-    { text: 'Arquivos',               icon: <Folder />,        path: '/arquivos',      visible: true  },
+    { text: 'Dashboard',              icon: <DashboardIcon />,   path: '/dashboard',    visible: true        },
+    { text: 'Empresas',               icon: <BusinessCenter />,  path: '/empresas',     visible: isSuperAdmin },
+    { text: 'Questionários',          icon: <Assignment />,      path: '/questionarios', visible: true        },
+    { text: 'Usuários',               icon: <People />,          path: '/usuarios',      visible: isRH        },
+    { text: 'Departamentos',          icon: <Business />,        path: '/departamentos', visible: isRH        },
+    { text: 'Avisos',                 icon: <Announcement />,    path: '/avisos',        visible: true        },
+    { text: 'Reclamações/Sugestões',  icon: <Feedback />,        path: '/reclamacoes',   visible: isRH        },
+    { text: 'Denúncias',              icon: <Report />,          path: '/denuncias',     visible: isRH        },
+    { text: 'Arquivos',               icon: <Folder />,          path: '/arquivos',      visible: true        },
   ];
 
   const drawer = (
