@@ -7,13 +7,16 @@ import {
   Typography,
   Card,
   CardContent,
+  Button,
 } from '@mui/material';
 import {
   PeopleOutline,
   AssignmentOutlined,
   AnnouncementOutlined,
   FeedbackOutlined,
+  PlayCircleOutline,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
@@ -25,7 +28,8 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
-  const { usuario } = useAuth();
+  const { usuario, isRH } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     total_usuarios: 0,
     questionarios_ativos: 0,
@@ -39,13 +43,22 @@ const Dashboard: React.FC = () => {
 
   const carregarEstatisticas = async () => {
     try {
-      // Simulação de carregamento - você pode implementar endpoints específicos
-      const [usuarios, questionarios, avisos, reclamacoes] = await Promise.all([
-        api.get('/usuarios'),
+      // Busca dados dependendo do tipo de permissão
+      const promises: Promise<any>[] = [
         api.get('/questionarios'),
         api.get('/avisos'),
-        api.get('/reclamacoes'),
-      ]);
+      ];
+
+      if (isRH) {
+        promises.push(api.get('/usuarios'));
+        promises.push(api.get('/reclamacoes'));
+      }
+
+      const results = await Promise.all(promises);
+      const questionarios = results[0];
+      const avisos = results[1];
+      const usuarios = isRH ? results[2] : { data: [] };
+      const reclamacoes = isRH ? results[3] : { data: [] };
 
       setStats({
         total_usuarios: usuarios.data.length,
@@ -93,14 +106,16 @@ const Dashboard: React.FC = () => {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Usuários Cadastrados"
-            value={stats.total_usuarios}
-            icon={<PeopleOutline fontSize="large" />}
-            color="primary"
-          />
-        </Grid>
+        {isRH && (
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Usuários Cadastrados"
+              value={stats.total_usuarios}
+              icon={<PeopleOutline fontSize="large" />}
+              color="primary"
+            />
+          </Grid>
+        )}
 
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
@@ -120,23 +135,41 @@ const Dashboard: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Reclamações Pendentes"
-            value={stats.reclamacoes_pendentes}
-            icon={<FeedbackOutlined fontSize="large" />}
-            color="warning"
-          />
-        </Grid>
+        {isRH && (
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Reclamações Pendentes"
+              value={stats.reclamacoes_pendentes}
+              icon={<FeedbackOutlined fontSize="large" />}
+              color="warning"
+            />
+          </Grid>
+        )}
 
         <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Ações Rápidas
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Use o menu lateral para navegar entre os módulos da plataforma
-            </Typography>
+          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Ações Rápidas
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Use o menu lateral para navegar entre os módulos da plataforma
+              </Typography>
+            </Box>
+
+            {!isRH && (
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<PlayCircleOutline />}
+                  onClick={() => navigate('/questionarios')}
+                >
+                  Responder Questionários
+                </Button>
+              </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>

@@ -13,6 +13,7 @@ import Reclamacoes from './pages/Reclamacoes';
 import Denuncias from './pages/Denuncias';
 import Empresas from './pages/Empresas';
 import ResponderQuestionario from './pages/ResponderQuestionario';
+import ResultadosQuestionario from './pages/ResultadosQuestionario';
 
 const theme = createTheme({
   palette: {
@@ -40,6 +41,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/empresas" element={<Empresas />} />
                 <Route path="/questionarios" element={<Questionarios />} />
                 <Route path="/questionarios/:id/responder" element={<ResponderQuestionario />} />
+                <Route path="/questionarios/:id/resultados" element={<ResultadosQuestionario />} />
                 <Route path="/usuarios" element={<Usuarios />} />
                 <Route path="/departamentos" element={<Departamentos />} />
                 <Route path="/avisos" element={<Avisos />} />

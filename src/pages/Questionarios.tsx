@@ -139,7 +139,18 @@ const Questionarios: React.FC = () => {
         data_inicio: questionario.data_inicio ? questionario.data_inicio.split('T')[0] : '',
         data_fim: questionario.data_fim ? questionario.data_fim.split('T')[0] : '',
         anonimo: false,
-        questoes: questionario.questoes || [],
+        questoes: questionario.questoes?.map((q: any) => {
+          if (q.tipo === 'sim_nao' && (!q.opcoes || q.opcoes.length === 0)) {
+            return {
+              ...q,
+              opcoes: [
+                { texto: 'Sim', valor: 1 },
+                { texto: 'Não', valor: 0 }
+              ]
+            }
+          }
+          return q;
+        }) || [],
       });
     } else {
       setQuestionarioSelecionado(null);
@@ -180,9 +191,15 @@ const Questionarios: React.FC = () => {
     const novasQuestoes = [...formData.questoes];
     (novasQuestoes[index] as any)[field] = value;
 
-    // Se mudar o tipo para escala, limpa as opções
-    if (field === 'tipo' && (value === 'escala' || value === 'texto_livre')) {
-      novasQuestoes[index].opcoes = [];
+    if (field === 'tipo') {
+      if (value === 'escala' || value === 'texto_livre') {
+        novasQuestoes[index].opcoes = [];
+      } else if (value === 'sim_nao') {
+        novasQuestoes[index].opcoes = [
+          { texto: 'Sim', valor: 1 },
+          { texto: 'Não', valor: 0 }
+        ];
+      }
     }
 
     setFormData({ ...formData, questoes: novasQuestoes });
@@ -515,26 +532,31 @@ const Questionarios: React.FC = () => {
                 </Grid>
               </Grid>
 
-              {questao.tipo === 'multipla_escolha' && (
+              {(questao.tipo === 'multipla_escolha' || questao.tipo === 'sim_nao') && (
                 <Box mt={2} pl={2} sx={{ borderLeft: '2px solid #eee' }}>
                   <Typography variant="caption" display="block" gutterBottom>Opções de Resposta:</Typography>
-                  {questao.opcoes?.map((opcao, oIndex) => (
+                  {questao.opcoes?.slice().sort((a, b) => (a as any).ordem - (b as any).ordem).map((opcao, oIndex) => (
                     <Box key={oIndex} display="flex" gap={1} mb={1}>
                       <TextField
                         placeholder={`Opção ${oIndex + 1}`}
                         fullWidth
                         size="small"
                         value={opcao.texto}
+                        disabled={questao.tipo === 'sim_nao'}
                         onChange={(e) => handleOpcaoChange(qIndex, oIndex, 'texto', e.target.value)}
                       />
-                      <IconButton size="small" color="error" onClick={() => handleRemoverOpcao(qIndex, oIndex)}>
-                        <Delete />
-                      </IconButton>
+                      {questao.tipo !== 'sim_nao' && (
+                        <IconButton size="small" color="error" onClick={() => handleRemoverOpcao(qIndex, oIndex)}>
+                          <Delete />
+                        </IconButton>
+                      )}
                     </Box>
                   ))}
-                  <Button size="small" startIcon={<Add />} onClick={() => handleAdicionarOpcao(qIndex)}>
-                    Add Opção
-                  </Button>
+                  {questao.tipo !== 'sim_nao' && (
+                    <Button size="small" startIcon={<Add />} onClick={() => handleAdicionarOpcao(qIndex)}>
+                      Add Opção
+                    </Button>
+                  )}
                 </Box>
               )}
 

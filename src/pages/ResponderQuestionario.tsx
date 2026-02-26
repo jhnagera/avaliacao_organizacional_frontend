@@ -23,6 +23,7 @@ interface Opcao {
     id: string;
     texto: string;
     valor: number;
+    ordem?: number;
 }
 
 interface Questao {
@@ -30,6 +31,7 @@ interface Questao {
     pergunta: string;
     tipo: string;
     obrigatoria: boolean;
+    ordem?: number;
     opcoes?: Opcao[];
 }
 
@@ -157,7 +159,7 @@ export default function ResponderQuestionario() {
                 <Divider sx={{ my: 3 }} />
 
                 <form onSubmit={handleSubmit}>
-                    {questionario.questoes.map((questao, index) => (
+                    {questionario.questoes.slice().sort((a, b) => (a.ordem || 0) - (b.ordem || 0)).map((questao, index) => (
                         <Box key={questao.id} sx={{ mb: 4 }}>
                             <FormControl component="fieldset" fullWidth error={questao.obrigatoria && !respostas[questao.id]?.value && respostas[questao.id]?.value !== 0}>
                                 <FormLabel component="legend" sx={{ fontWeight: 'bold', mb: 1, color: 'text.primary' }}>
@@ -169,7 +171,7 @@ export default function ResponderQuestionario() {
                                         value={respostas[questao.id]?.value || ''}
                                         onChange={(e) => handleRespostaChange(questao.id, e.target.value, questao.tipo)}
                                     >
-                                        {questao.opcoes?.map((opcao) => (
+                                        {questao.opcoes?.slice().sort((a, b) => (a.ordem || 0) - (b.ordem || 0)).map((opcao) => (
                                             <FormControlLabel
                                                 key={opcao.id}
                                                 value={opcao.id}
