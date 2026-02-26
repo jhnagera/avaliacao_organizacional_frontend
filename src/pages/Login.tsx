@@ -48,7 +48,17 @@ const Login: React.FC = () => {
       >
         <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <AssessmentOutlined sx={{ fontSize: 60, color: 'primary.main' }} />
+            <Box
+              component="img"
+              src="/logo.png"
+              alt="Anexo Tecnologia"
+              sx={{
+                width: '100%',
+                maxWidth: '250px',
+                height: 'auto',
+                mb: 2,
+              }}
+            />
             <Typography variant="h4" component="h1" gutterBottom>
               Avaliação Organizacional
             </Typography>
