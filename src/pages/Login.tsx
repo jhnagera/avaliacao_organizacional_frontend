@@ -9,8 +9,8 @@ import {
   Typography,
   Box,
   Alert,
+  Divider,
 } from '@mui/material';
-import { AssessmentOutlined } from '@mui/icons-material';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -100,8 +100,20 @@ const Login: React.FC = () => {
               fullWidth
               size="large"
               disabled={carregando}
+              sx={{ mb: 2 }}
             >
               {carregando ? 'Entrando...' : 'Entrar'}
+            </Button>
+
+            <Divider sx={{ my: 2 }}>ou</Divider>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate('/denuncia-anonima')}
+            >
+              Fazer uma Denúncia Anônima
             </Button>
           </form>
         </Paper>

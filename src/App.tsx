@@ -14,6 +14,7 @@ import Denuncias from './pages/Denuncias';
 import Empresas from './pages/Empresas';
 import ResponderQuestionario from './pages/ResponderQuestionario';
 import ResultadosQuestionario from './pages/ResultadosQuestionario';
+import DenunciaAnonima from './pages/DenunciaAnonima';
 
 const theme = createTheme({
   palette: {
@@ -31,6 +32,7 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/denuncia-anonima" element={<DenunciaAnonima />} />
       <Route
         path="/*"
         element={
