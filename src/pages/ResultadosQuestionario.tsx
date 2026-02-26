@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Container,
@@ -9,6 +9,12 @@ import {
     CircularProgress,
     Divider,
     Grid,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
 } from '@mui/material';
 import { ArrowBack, Assessment } from '@mui/icons-material';
 import api from '../services/api';
@@ -46,8 +52,16 @@ interface ResultadosData {
         id: string;
         titulo: string;
         total_participantes: number;
+        anonimo: boolean;
     };
     resultados: ResultadoQuestao[];
+    respostas_detalhadas?: {
+        usuario_id: string;
+        nome: string;
+        email: string;
+        data: string;
+        respostas: Record<string, string>;
+    }[];
 }
 
 export default function ResultadosQuestionario() {
@@ -178,6 +192,51 @@ export default function ResultadosQuestionario() {
                             )}
                         </Paper>
                     ))
+                )}
+
+                {/* --- Tabela de Respostas Detalhadas --- */}
+                {!data.questionario.anonimo && data.respostas_detalhadas && data.respostas_detalhadas.length > 0 && (
+                    <Box mt={6}>
+                        <Typography variant="h5" gutterBottom>
+                            Respostas Detalhadas por Colaborador
+                        </Typography>
+                        <Divider sx={{ mb: 3 }} />
+                        <TableContainer component={Paper} variant="outlined">
+                            <Table>
+                                <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                                    <TableRow>
+                                        <TableCell><strong>Candidato / Colaborador</strong></TableCell>
+                                        <TableCell><strong>Data</strong></TableCell>
+                                        {data.resultados.map((q, i) => (
+                                            <TableCell key={q.questao_id}><strong>Q{i + 1}</strong></TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {data.respostas_detalhadas.map((r, index) => (
+                                        <TableRow key={index} hover>
+                                            <TableCell>
+                                                <Typography variant="body2" fontWeight={600}>{r.nome}</Typography>
+                                                <Typography variant="caption" color="textSecondary">{r.email}</Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2">
+                                                    {new Date(r.data).toLocaleDateString()}
+                                                </Typography>
+                                            </TableCell>
+                                            {data.resultados.map(q => (
+                                                <TableCell key={q.questao_id}>
+                                                    <Typography variant="body2" noWrap sx={{ maxWidth: 150 }} title={r.respostas[q.questao_id] || '-'}>
+                                                        {r.respostas[q.questao_id] || '-'}
+                                                    </Typography>
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
                 )}
             </Paper>
         </Container>
