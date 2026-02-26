@@ -40,6 +40,8 @@ interface Questionario {
     titulo: string;
     descricao: string;
     questoes: Questao[];
+    respondido?: boolean;
+    minhas_respostas?: { questao_id: string, opcao_id?: string, resposta_valor?: number, resposta_texto?: string }[];
 }
 
 export default function ResponderQuestionario() {
@@ -56,6 +58,21 @@ export default function ResponderQuestionario() {
             try {
                 const response = await api.get(`/questionarios/${id}`);
                 setQuestionario(response.data);
+
+                if (response.data.respondido) {
+                    try {
+                        const recResponse = await api.get(`/questionarios/${id}/minhas-respostas`);
+                        const mapRespostas: Record<string, any> = {};
+                        recResponse.data.forEach((r: any) => {
+                            if (r.opcao_id) mapRespostas[r.questao_id] = { value: r.opcao_id, tipo: 'opcao' };
+                            if (r.resposta_valor !== null) mapRespostas[r.questao_id] = { value: r.resposta_valor, tipo: 'escala' };
+                            if (r.resposta_texto) mapRespostas[r.questao_id] = { value: r.resposta_texto, tipo: 'texto_livre' };
+                        });
+                        setRespostas(mapRespostas);
+                    } catch (e) {
+                        // silently ignore if endpoint doesn't exist
+                    }
+                }
             } catch (err: any) {
                 console.error('Erro ao buscar questionário:', err);
                 setError(err.response?.data?.error || 'Erro ao carregar o questionário. Pode não existir ou você não tem acesso.');
@@ -146,6 +163,14 @@ export default function ResponderQuestionario() {
                 Voltar para Questionários
             </Button>
 
+            {questionario.respondido && (
+                <Box sx={{ mb: 2, p: 2, bgcolor: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: 1 }}>
+                    <Typography variant="body1" color="success.main" fontWeight={500}>
+                        Você já respondeu a este questionário. As respostas abaixo são apenas para visualização.
+                    </Typography>
+                </Box>
+            )}
+
             <Paper elevation={3} sx={{ p: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     {questionario.titulo}
@@ -175,7 +200,7 @@ export default function ResponderQuestionario() {
                                             <FormControlLabel
                                                 key={opcao.id}
                                                 value={opcao.id}
-                                                control={<Radio />}
+                                                control={<Radio disabled={questionario?.respondido} />}
                                                 label={opcao.texto}
                                             />
                                         ))}
@@ -191,6 +216,7 @@ export default function ResponderQuestionario() {
                                         placeholder="Sua resposta..."
                                         value={respostas[questao.id]?.value || ''}
                                         onChange={(e) => handleRespostaChange(questao.id, e.target.value, questao.tipo)}
+                                        disabled={questionario?.respondido}
                                     />
                                 )}
 
@@ -204,6 +230,7 @@ export default function ResponderQuestionario() {
                                             step={1}
                                             marks
                                             valueLabelDisplay="auto"
+                                            disabled={questionario?.respondido}
                                         />
                                         <Box display="flex" justifyContent="space-between">
                                             <Typography variant="caption">1</Typography>
@@ -215,18 +242,20 @@ export default function ResponderQuestionario() {
                         </Box>
                     ))}
 
-                    <Box mt={4} display="flex" justifyContent="flex-end">
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            size="large"
-                            startIcon={<Save />}
-                            disabled={submitting}
-                        >
-                            {submitting ? 'Enviando...' : 'Enviar Respostas'}
-                        </Button>
-                    </Box>
+                    {!questionario.respondido && (
+                        <Box mt={4} display="flex" justifyContent="flex-end">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                size="large"
+                                startIcon={<Save />}
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Enviando...' : 'Finalizar e Enviar Questionário'}
+                            </Button>
+                        </Box>
+                    )}
                 </form>
             </Paper>
         </Container>

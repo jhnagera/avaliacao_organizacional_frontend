@@ -44,6 +44,7 @@ interface Questionario {
   departamento?: { nome: string };
   usuario?: { nome: string };
   questoes?: Questao[];
+  respondido?: boolean;
 }
 
 interface Questao {
@@ -318,7 +319,7 @@ const Questionarios: React.FC = () => {
                     : '-'}
                 </TableCell>
                 <TableCell align="right">
-                  {!isRH && questionario.status === 'ativo' && (
+                  {!isRH && questionario.status === 'ativo' && !questionario.respondido && (
                     <IconButton
                       size="small"
                       color="success"
@@ -327,6 +328,15 @@ const Questionarios: React.FC = () => {
                     >
                       <PlayArrow />
                     </IconButton>
+                  )}
+                  {!isRH && questionario.respondido && (
+                    <Chip
+                      size="small"
+                      color="info"
+                      label="Visualizar Respostas"
+                      onClick={() => navigate(`/questionarios/${questionario.id}/responder`)}
+                      sx={{ ml: 1, cursor: 'pointer' }}
+                    />
                   )}
                   {isRH && (
                     <>
