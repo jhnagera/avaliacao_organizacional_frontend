@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import api from '../services/api';
 
 interface Usuario {
@@ -6,7 +6,7 @@ interface Usuario {
   nome: string;
   email: string;
   // 1. Adicionado 'super_admin' ao tipo
-  tipo: 'super_admin' | 'admin' | 'rh' | 'colaborador'; 
+  tipo: 'super_admin' | 'admin' | 'rh' | 'colaborador';
   empresa_id: string;
 }
 
@@ -24,18 +24,14 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+  const [usuario, setUsuario] = useState<Usuario | null>(() => {
     const storedUsuario = localStorage.getItem('usuario');
+    return storedUsuario ? JSON.parse(storedUsuario) : null;
+  });
 
-    if (storedToken && storedUsuario) {
-      setToken(storedToken);
-      setUsuario(JSON.parse(storedUsuario));
-    }
-  }, []);
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('token') || null;
+  });
 
   const login = async (email: string, senha: string) => {
     try {

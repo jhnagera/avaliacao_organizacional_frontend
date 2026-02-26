@@ -24,8 +24,10 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { Add, Edit, Delete, Assessment } from '@mui/icons-material';
+import { Add, Edit, Delete, Assessment, PlayArrow } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Questionario {
   id: string;
@@ -69,6 +71,8 @@ interface Usuario {
 }
 
 const Questionarios: React.FC = () => {
+  const { isRH } = useAuth();
+  const navigate = useNavigate();
   const [questionarios, setQuestionarios] = useState<Questionario[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -245,13 +249,15 @@ const Questionarios: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Questionários</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => handleAbrirDialog()}
-        >
-          Novo Questionário
-        </Button>
+        {isRH && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => handleAbrirDialog()}
+          >
+            Novo Questionário
+          </Button>
+        )}
       </Box>
 
       <TableContainer component={Paper}>
@@ -295,27 +301,44 @@ const Questionarios: React.FC = () => {
                     : '-'}
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => window.location.href = `/questionarios/${questionario.id}/resultados`}
-                  >
-                    <Assessment />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => handleAbrirDialog(questionario)}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleDeletar(questionario.id)}
-                  >
-                    <Delete />
-                  </IconButton>
+                  {!isRH && questionario.status === 'ativo' && (
+                    <IconButton
+                      size="small"
+                      color="success"
+                      onClick={() => navigate(`/questionarios/${questionario.id}/responder`)}
+                      title="Responder Questionário"
+                    >
+                      <PlayArrow />
+                    </IconButton>
+                  )}
+                  {isRH && (
+                    <>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => navigate(`/questionarios/${questionario.id}/resultados`)}
+                        title="Ver Resultados"
+                      >
+                        <Assessment />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleAbrirDialog(questionario)}
+                        title="Editar"
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeletar(questionario.id)}
+                        title="Deletar"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

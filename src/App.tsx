@@ -12,6 +12,7 @@ import Avisos from './pages/Avisos';
 import Reclamacoes from './pages/Reclamacoes';
 import Denuncias from './pages/Denuncias';
 import Empresas from './pages/Empresas';
+import ResponderQuestionario from './pages/ResponderQuestionario';
 
 const theme = createTheme({
   palette: {
@@ -35,15 +36,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Routes>
-                <Route path="/dashboard"     element={<Dashboard />} />
-                <Route path="/empresas"      element={<Empresas />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/empresas" element={<Empresas />} />
                 <Route path="/questionarios" element={<Questionarios />} />
-                <Route path="/usuarios"      element={<Usuarios />} />
+                <Route path="/questionarios/:id/responder" element={<ResponderQuestionario />} />
+                <Route path="/usuarios" element={<Usuarios />} />
                 <Route path="/departamentos" element={<Departamentos />} />
-                <Route path="/avisos"        element={<Avisos />} />
-                <Route path="/reclamacoes"   element={<Reclamacoes />} />
-                <Route path="/denuncias"     element={<Denuncias />} />
-                <Route path="/"              element={<Navigate to="/dashboard" />} />
+                <Route path="/avisos" element={<Avisos />} />
+                <Route path="/reclamacoes" element={<Reclamacoes />} />
+                <Route path="/denuncias" element={<Denuncias />} />
+                <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
             </Layout>
           </ProtectedRoute>
