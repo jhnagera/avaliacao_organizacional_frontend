@@ -3,10 +3,12 @@ import {
   Container, Typography, Button, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, IconButton, Chip,
   Box, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, MenuItem, Alert, Snackbar, Tooltip, Tabs, Tab
+  TextField, MenuItem, Alert, Snackbar, Tooltip, Tabs, Tab,
+  FormControlLabel, Switch
 } from '@mui/material';
-import { Visibility, Edit } from '@mui/icons-material';
+import { Visibility, Add } from '@mui/icons-material';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Reclamacao {
   id: string;
@@ -28,12 +30,20 @@ const statusLabel: Record<string, string> = {
 };
 
 const Reclamacoes: React.FC = () => {
+  const { isRH } = useAuth();
   const [itens, setItens] = useState<Reclamacao[]>([]);
   const [aba, setAba] = useState(0);
+  // Dialog de visualização/resposta (RH)
   const [dialogAberto, setDialogAberto] = useState(false);
   const [selecionado, setSelecionado] = useState<Reclamacao | null>(null);
   const [respostaRh, setRespostaRh] = useState('');
   const [novoStatus, setNovoStatus] = useState('');
+  // Dialog de criação (colaborador)
+  const [dialogCriar, setDialogCriar] = useState(false);
+  const [novoTitulo, setNovoTitulo] = useState('');
+  const [novaDescricao, setNovaDescricao] = useState('');
+  const [novoAnonimo, setNovoAnonimo] = useState(false);
+
   const [carregando, setCarregando] = useState(false);
   const [snackbar, setSnackbar] = useState({ aberto: false, mensagem: '', tipo: 'success' as 'success' | 'error' });
 
@@ -72,12 +82,47 @@ const Reclamacoes: React.FC = () => {
     finally { setCarregando(false); }
   };
 
+  const handleCriar = async () => {
+    if (!novoTitulo.trim() || !novaDescricao.trim()) {
+      mostrarSnackbar('Preencha todos os campos obrigatórios', 'error');
+      return;
+    }
+    setCarregando(true);
+    try {
+      await api.post('/reclamacoes', {
+        tipo: aba === 0 ? 'reclamacao' : 'sugestao',
+        titulo: novoTitulo,
+        descricao: novaDescricao,
+        anonimo: novoAnonimo
+      });
+      mostrarSnackbar(
+        aba === 0 ? 'Reclamação enviada com sucesso!' : 'Sugestão enviada com sucesso!',
+        'success'
+      );
+      setDialogCriar(false);
+      setNovoTitulo('');
+      setNovaDescricao('');
+      setNovoAnonimo(false);
+      carregar();
+    } catch { mostrarSnackbar('Erro ao enviar', 'error'); }
+    finally { setCarregando(false); }
+  };
+
   const tipoAtual = aba === 0 ? 'reclamacao' : 'sugestao';
   const itensFiltrados = itens.filter(i => i.tipo === tipoAtual);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" mb={3}>Reclamações e Sugestões</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">Reclamações e Sugestões</Typography>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => setDialogCriar(true)}
+        >
+          Nova {aba === 0 ? 'Reclamação' : 'Sugestão'}
+        </Button>
+      </Box>
 
       <Tabs value={aba} onChange={(_, v) => setAba(v)} sx={{ mb: 2 }}>
         <Tab label="Reclamações" />
@@ -123,7 +168,7 @@ const Reclamacoes: React.FC = () => {
                 </TableCell>
                 <TableCell>{new Date(item.criado_em).toLocaleDateString('pt-BR')}</TableCell>
                 <TableCell align="right">
-                  <Tooltip title="Ver / Responder">
+                  <Tooltip title="Ver detalhes">
                     <IconButton size="small" color="primary" onClick={() => handleAbrir(item)}>
                       <Visibility fontSize="small" />
                     </IconButton>
@@ -137,7 +182,7 @@ const Reclamacoes: React.FC = () => {
 
       {/* Dialog de detalhe + resposta */}
       <Dialog open={dialogAberto} onClose={() => setDialogAberto(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Detalhes / Resposta do RH</DialogTitle>
+        <DialogTitle>Detalhes {isRH ? '/ Resposta do RH' : ''}</DialogTitle>
         <DialogContent dividers>
           {selecionado && (
             <Box display="flex" flexDirection="column" gap={2} pt={1}>
@@ -146,23 +191,73 @@ const Reclamacoes: React.FC = () => {
               <TextField label="Autor" fullWidth
                 value={selecionado.anonimo ? 'Anônimo' : selecionado.usuario?.nome || '—'}
                 InputProps={{ readOnly: true }} />
-              <TextField label="Status" fullWidth select value={novoStatus}
-                onChange={(e) => setNovoStatus(e.target.value)}>
-                <MenuItem value="pendente">Pendente</MenuItem>
-                <MenuItem value="em_analise">Em Análise</MenuItem>
-                <MenuItem value="resolvido">Resolvido</MenuItem>
-                <MenuItem value="rejeitado">Rejeitado</MenuItem>
-              </TextField>
-              <TextField label="Resposta do RH" fullWidth multiline rows={3}
-                value={respostaRh} onChange={(e) => setRespostaRh(e.target.value)}
-                placeholder="Digite a resposta ou observação do RH..." />
+              <TextField label="Status" fullWidth
+                value={statusLabel[selecionado.status] || selecionado.status}
+                InputProps={{ readOnly: !isRH }}
+                {...(isRH ? {
+                  select: true,
+                  value: novoStatus,
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => setNovoStatus(e.target.value),
+                  children: [
+                    <MenuItem key="pendente" value="pendente">Pendente</MenuItem>,
+                    <MenuItem key="em_analise" value="em_analise">Em Análise</MenuItem>,
+                    <MenuItem key="resolvido" value="resolvido">Resolvido</MenuItem>,
+                    <MenuItem key="rejeitado" value="rejeitado">Rejeitado</MenuItem>
+                  ]
+                } : {})} />
+              {(isRH || selecionado.resposta_rh) && (
+                <TextField label="Resposta do RH" fullWidth multiline rows={3}
+                  value={isRH ? respostaRh : (selecionado.resposta_rh || 'Aguardando resposta...')}
+                  onChange={isRH ? (e) => setRespostaRh(e.target.value) : undefined}
+                  InputProps={{ readOnly: !isRH }}
+                  placeholder="Digite a resposta ou observação do RH..." />
+              )}
             </Box>
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setDialogAberto(false)} disabled={carregando}>Fechar</Button>
-          <Button variant="contained" onClick={handleSalvar} disabled={carregando}>
-            {carregando ? 'Salvando...' : 'Salvar Resposta'}
+          {isRH && (
+            <Button variant="contained" onClick={handleSalvar} disabled={carregando}>
+              {carregando ? 'Salvando...' : 'Salvar Resposta'}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de criação */}
+      <Dialog open={dialogCriar} onClose={() => setDialogCriar(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Nova {aba === 0 ? 'Reclamação' : 'Sugestão'}</DialogTitle>
+        <DialogContent dividers>
+          <Box display="flex" flexDirection="column" gap={2} pt={1}>
+            <TextField
+              label="Título"
+              fullWidth
+              required
+              value={novoTitulo}
+              onChange={(e) => setNovoTitulo(e.target.value)}
+              placeholder={aba === 0 ? 'Título da reclamação...' : 'Título da sugestão...'}
+            />
+            <TextField
+              label="Descrição"
+              fullWidth
+              required
+              multiline
+              rows={5}
+              value={novaDescricao}
+              onChange={(e) => setNovaDescricao(e.target.value)}
+              placeholder="Descreva detalhadamente..."
+            />
+            <FormControlLabel
+              control={<Switch checked={novoAnonimo} onChange={(e) => setNovoAnonimo(e.target.checked)} />}
+              label="Enviar anonimamente"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setDialogCriar(false)} disabled={carregando}>Cancelar</Button>
+          <Button variant="contained" onClick={handleCriar} disabled={carregando}>
+            {carregando ? 'Enviando...' : 'Enviar'}
           </Button>
         </DialogActions>
       </Dialog>
