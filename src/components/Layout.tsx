@@ -46,7 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Usuários', icon: <People />, path: '/usuarios', visible: isRH },
     { text: 'Departamentos', icon: <Business />, path: '/departamentos', visible: isRH },
     { text: 'Avisos', icon: <Announcement />, path: '/avisos', visible: true },
-    { text: 'Reclamações/Sugestões', icon: <Feedback />, path: '/reclamacoes', visible: isRH },
+    { text: 'Reclamações/Sugestões', icon: <Feedback />, path: '/reclamacoes', visible: true },
     { text: 'Denúncias', icon: <Report />, path: '/denuncias', visible: isAdmin },
     { text: 'Arquivos', icon: <Folder />, path: '/arquivos', visible: true },
   ];
