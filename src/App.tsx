@@ -15,6 +15,7 @@ import Empresas from './pages/Empresas';
 import ResponderQuestionario from './pages/ResponderQuestionario';
 import ResultadosQuestionario from './pages/ResultadosQuestionario';
 import DenunciaAnonima from './pages/DenunciaAnonima';
+import ContraCheques from './pages/ContraCheques';
 
 const theme = createTheme({
   palette: {
@@ -49,6 +50,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/avisos" element={<Avisos />} />
                 <Route path="/reclamacoes" element={<Reclamacoes />} />
                 <Route path="/denuncias" element={<Denuncias />} />
+                <Route path="/contracheques" element={<ContraCheques />} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
             </Layout>

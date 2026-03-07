@@ -18,6 +18,7 @@ import {
   Logout,
   Business,
   BusinessCenter,
+  FolderShared,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -49,6 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Reclamações/Sugestões', icon: <Feedback />, path: '/reclamacoes', visible: true },
     { text: 'Denúncias', icon: <Report />, path: '/denuncias', visible: isAdmin },
     { text: 'Arquivos', icon: <Folder />, path: '/arquivos', visible: true },
+    { text: 'Contra Cheques', icon: <FolderShared />, path: '/contracheques', visible: true },
   ];
 
   const drawer = (
